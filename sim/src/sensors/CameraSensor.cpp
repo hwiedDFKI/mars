@@ -22,8 +22,11 @@
 
 #include <mars/data_broker/DataBrokerInterface.h>
 #include <mars/utils/mathUtils.h>
+#include <mars/utils/Vector.h>
+#include <mars/utils/Quaternion.h>
 #include <mars/interfaces/sim/LoadCenter.h>
 #include <mars/interfaces/sim/NodeManagerInterface.h>
+#include <mars/interfaces/sim/EntityManagerInterface.h>
 #include <mars/interfaces/sim/SimulatorInterface.h>
 #include <mars/interfaces/sim/ControlCenter.h>
 #include <mars/interfaces/graphics/GraphicsManagerInterface.h>
@@ -158,6 +161,48 @@ namespace mars {
         assert(config.height == height);
     }
 
+    void CameraSensor::getDepthImage(std::vector< mars::sim::DistanceMeasurement >& buffer)
+    {
+        assert(buffer.size() == (config.width * config.height));
+        int width;
+        int height;
+        gw->getRTTDepthData(reinterpret_cast<float *>(buffer.data()), width, height);
+
+        assert(config.width == width);
+        assert(config.height == height);
+    }
+    /* TODO
+    int CameraSensor::getNumberOfEntitiesInView() {
+      // TODO add flag for what needs to be in view to be counted
+      // flags for: bounding box, COM, complete
+    }
+    */
+    /* REVIEW
+    const std::map<unsigned long, SimEntity*> CameraSensor::getEntitiesInView(double horizontalOpeningAngle,
+                                                                              double verticalOpeningAngle) {
+      all_entities = control->entities->getEntities();
+      std::map<unsigned long, SimEntity*> view_entities;
+      for (std::map<unsigned long, SimEntity*>::iterator iter = all_entities.begin();
+          iter != all_entities.end(); ++iter) {
+            Vector com = iter->second->getEntityCOM();
+            cameraStruct cs;
+            getCameraInfo(&cs);
+            vecCamToEnt = com - cs.pos;
+            vecView = cs.rot.toRotationMatrix()*Vector(1,0,0);
+            vecViewX = cs.rot.toRotationMatrix()*Vector(0,1,0);
+            vecViewY = cs.rot.toRotationMatrix()*Vector(0,0,1);
+
+            Vector ent_in_x = projectVectorToPlane(vecCamToEnt,vecView,vecViewY).normalized()*vecCamToEnt.norm();
+            double angle_x = angleBetween(vecViewY, ent_in_x) - M_PI;
+
+            Vector ent_in_y = projectVectorToPlane(vecCamToEnt,vecView,vecViewX).normalized()*vecCamToEnt.norm();
+            double angle_y = angleBetween(vecViewX, ent_in_y) - M_PI;
+
+            if (fabs(angle_x)<=horizontalOpeningAngle/2.0) && (fabs(angle_y)<=verticalOpeningAngle/2.0):
+              view_entities.push_back(iter)
+      }
+    }
+    */
 
     // this function is a hack currently, it uses sReal* as byte buffer
     // NOTE: never use the cameraSensor in a controller list!!!!
