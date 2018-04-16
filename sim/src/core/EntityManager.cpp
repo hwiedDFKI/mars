@@ -143,6 +143,10 @@ namespace mars {
       //TODO <jonas.peter@dfki.de> handle deselection
     }
 
+    const std::map<unsigned long, SimEntity*> EntityManager::getEntities() {
+      return entities;
+    }
+
     SimEntity* EntityManager::getEntity(const std::string& name) {
       for (std::map<unsigned long, SimEntity*>::iterator iter = entities.begin();
           iter != entities.end(); ++iter) {
